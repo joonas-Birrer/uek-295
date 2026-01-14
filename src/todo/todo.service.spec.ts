@@ -670,7 +670,7 @@ describe('TodoService', () => {
       updatedById: 2,
       createdAt: date,
       updatedAt: date,
-    } as TodoEntity;
+    } as unknown as TodoEntity;
 
     const updatedTodo = {
       ...todo,
