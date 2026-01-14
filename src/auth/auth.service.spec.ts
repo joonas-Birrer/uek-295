@@ -11,7 +11,6 @@ import { CreateUserDto, ReturnUserDto } from '../user/dto';
 describe('AuthService', () => {
   let service: AuthService;
 
-  // Mocked services
   const usersService = {
     findOneEntityByUsername: jest.fn(),
     create: jest.fn(),

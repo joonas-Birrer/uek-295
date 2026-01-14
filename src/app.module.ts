@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,10 +15,10 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: configService.get<'sqlite'>('DB_TYPE', 'sqlite'),
-        database: configService.get<string>('DB_DATABASE', 'data/app.db'), // Pfad zur SQLite-Datei
+        database: configService.get<string>('DB_DATABASE', 'data/app.db'),
         entities: [],
         autoLoadEntities: true,
-        synchronize: true, // DEV ok, PROD besser mit Migrations
+        synchronize: true,
         logging: false,
       }),
     }),

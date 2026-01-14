@@ -1,11 +1,10 @@
-// src/user/user.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { UserEntity } from './entities/user.entity';
-import { PasswordService } from '../../../uek-lb/src/user/password.service';
+import { PasswordService } from './password.service';
 import { CreateUserDto, ReturnUserDto, UpdateUserAdminDto } from './dto';
 
 type RepoMock = {
@@ -28,10 +27,6 @@ describe('UserService', () => {
     password: 'password',
     isAdmin: false,
   } as CreateUserDto;
-  // const createAdminDto = {
-  //   ...createUserDto,
-  //   isAdmin: true,
-  // } as CreateUserDto;
   const userEntity = {
     id: 1,
     username: 'test',
@@ -39,10 +34,6 @@ describe('UserService', () => {
     passwordHash: 'hashed_password',
     isAdmin: false,
   } as UserEntity;
-  // const adminEntity = {
-  //   ...userEntity,
-  //   isAdmin: true,
-  // } as UserEntity;
 
   beforeEach(async () => {
     repo = {
@@ -99,7 +90,7 @@ describe('UserService', () => {
   describe('create', () => {
     it('should create a user when username does not exist', async () => {
       repo.create.mockReturnValue(userEntity);
-      repo.findOneBy.mockResolvedValue(null); // username free
+      repo.findOneBy.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue('HASHED');
       repo.save.mockResolvedValue(userEntity);
 
@@ -113,7 +104,6 @@ describe('UserService', () => {
       expect(hashSpy).toHaveBeenCalledWith(createUserDto.password);
       expect(repo.save).toHaveBeenCalled();
 
-      // must NOT leak passwordHash
       expect(result).toEqual({
         id: 1,
         username: createUserDto.username,
@@ -136,10 +126,6 @@ describe('UserService', () => {
           password: 'pw',
         } as CreateUserDto),
       ).rejects.toThrow(ConflictException);
-      // const hashSpy = jest.spyOn(passwordService, 'hashPassword');
-      // await service.create(1, createUserDto);
-      // expect(hashSpy).not.toHaveBeenCalled();
-      // expect(repo.save).not.toHaveBeenCalled();
     });
   });
 

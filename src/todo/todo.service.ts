@@ -53,7 +53,6 @@ export class TodoService {
 
   async findAll(userId: number, isAdmin: boolean): Promise<ReturnTodoDto[]> {
     if (isAdmin) {
-      // Admin sees all Todos
       const arr = await this.repo.find();
       return arr.map((e) => this.entityToDto(e));
     }
@@ -84,7 +83,7 @@ export class TodoService {
       );
     }
 
-    if (!isAdmin && entity.isClosed === true) {
+    if (!isAdmin && entity.isClosed) {
       throw new ForbiddenException('You can only view your open Todos');
     }
 

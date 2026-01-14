@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as argon2 from 'argon2';
-import { PasswordService } from '../../../uek-lb/src/user/password.service';
+import { PasswordService } from './password.service';
 
 jest.mock('argon2', () => ({
   hash: jest.fn(),
@@ -25,9 +25,6 @@ describe('PasswordService', () => {
     expect(service).toBeDefined();
   });
 
-  // ----------------------------------------------------------------
-  // hashPassword
-  // ----------------------------------------------------------------
   it('hashPassword() should call argon2.hash with correct options', async () => {
     (argon2.hash as jest.Mock).mockResolvedValue('hashed-password');
 
@@ -43,9 +40,6 @@ describe('PasswordService', () => {
     expect(result).toBe('hashed-password');
   });
 
-  // ----------------------------------------------------------------
-  // verifyPassword – success
-  // ----------------------------------------------------------------
   it('verifyPassword() should return true when argon2.verify succeeds', async () => {
     (argon2.verify as jest.Mock).mockResolvedValue(true);
 
@@ -55,9 +49,6 @@ describe('PasswordService', () => {
     expect(result).toBe(true);
   });
 
-  // ----------------------------------------------------------------
-  // verifyPassword – false
-  // ----------------------------------------------------------------
   it('verifyPassword() should return false when argon2.verify returns false', async () => {
     (argon2.verify as jest.Mock).mockResolvedValue(false);
 
@@ -67,9 +58,6 @@ describe('PasswordService', () => {
     expect(result).toBe(false);
   });
 
-  // ----------------------------------------------------------------
-  // verifyPassword – exception (catch path)
-  // ----------------------------------------------------------------
   it('verifyPassword() should return false when argon2.verify throws', async () => {
     (argon2.verify as jest.Mock).mockRejectedValue(new Error('invalid hash'));
 

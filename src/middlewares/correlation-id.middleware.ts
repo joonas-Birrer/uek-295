@@ -1,11 +1,9 @@
-// src/middlewares/correlation-id.middleware.ts
 import { Response, NextFunction } from 'express';
 import { CorrelationIdRequest } from '../types/correlation-id-request';
 import { randomInt } from 'node:crypto';
 
 export function correlationIdMiddleware(
   req: CorrelationIdRequest,
-  // Response wird nicht benötigt. Um den Linter zu "überlisten", kannst du einfach ein _ einfügen
   _res: Response,
   next: NextFunction,
 ) {

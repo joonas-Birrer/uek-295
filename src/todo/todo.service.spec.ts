@@ -40,7 +40,6 @@ describe('TodoService', () => {
     expect(service).toBeDefined();
   });
 
-  // Test for creating a Todo
   it('create() should create a new todo and return it', async () => {
     const createTodoDto: CreateTodoDto = {
       title: 'Test Todo',
@@ -75,7 +74,6 @@ describe('TodoService', () => {
     });
   });
 
-  // Test for finding all Todos
   it('findAll() should return todos for a user', async () => {
     const userId = 1;
     const isAdmin = false;
@@ -117,7 +115,6 @@ describe('TodoService', () => {
     ]);
   });
 
-  // Test for finding one Todo
   it('findOne() should return a todo if it exists', async () => {
     const userId = 1;
     const isAdmin = false;
@@ -151,7 +148,6 @@ describe('TodoService', () => {
     });
   });
 
-  // Test for finding one Todo (Not Found)
   it('findOne() should throw NotFoundException if todo is not found', async () => {
     const userId = 1;
     const isAdmin = false;
@@ -164,7 +160,6 @@ describe('TodoService', () => {
     );
   });
 
-  // Test for updating a Todo by user
   it('updateUser() should update a todo for a user', async () => {
     const userId = 1;
     const todoId = 1;
@@ -201,7 +196,6 @@ describe('TodoService', () => {
     });
   });
 
-  // Test for deleting a Todo by admin
   it('remove() should delete a todo for an admin', async () => {
     const adminId = 1;
     const todoId = 1;
@@ -236,7 +230,6 @@ describe('TodoService', () => {
     });
   });
 
-  // Test for remove() when the user is not an admin
   it('remove() should throw ForbiddenException if user is not an admin', async () => {
     const userId = 1;
     const todoId = 1;
@@ -259,7 +252,6 @@ describe('TodoService', () => {
     );
   });
 
-  // Test for findAll when admin user exists
   it('findAll() should return all todos when admin user is true', async () => {
     const adminId = 1;
     const isAdmin = true;
@@ -316,10 +308,9 @@ describe('TodoService', () => {
     ]);
   });
 
-  // Test for updating a Todo by a user who is not the creator
   it("updateUser() should throw ForbiddenException if user tries to update another user's todo", async () => {
     const userId = 1;
-    const todoId = 2; // Todo created by another user
+    const todoId = 2;
     const updateDto: UpdateTodoDto = { isClosed: false };
 
     const todo = {
@@ -327,7 +318,7 @@ describe('TodoService', () => {
       title: 'Test Todo',
       description: 'Test Description',
       isClosed: false,
-      createdById: 2, // Created by another user
+      createdById: 2,
       updatedById: 2,
       createdAt: date,
       updatedAt: date,
@@ -340,10 +331,9 @@ describe('TodoService', () => {
     );
   });
 
-  // Test for removing a Todo when todo does not exist
   it('remove() should throw NotFoundException if todo does not exist', async () => {
     const adminId = 1;
-    const todoId = 999; // Non-existent Todo ID
+    const todoId = 999;
 
     mockTodoRepository.findOneBy.mockResolvedValue(null);
 
@@ -352,7 +342,6 @@ describe('TodoService', () => {
     );
   });
 
-  // Test for findAll when admin user exists
   it('findAll() should return all todos when admin user is true', async () => {
     const adminId = 1;
     const isAdmin = true;
@@ -409,10 +398,9 @@ describe('TodoService', () => {
     ]);
   });
 
-  // Test for updating a Todo by a user who is not the creator
   it("updateUser() should throw ForbiddenException if user tries to update another user's todo", async () => {
     const userId = 1;
-    const todoId = 2; // Todo created by another user
+    const todoId = 2;
     const updateDto: UpdateTodoDto = { isClosed: true };
 
     const todo = {
@@ -420,7 +408,7 @@ describe('TodoService', () => {
       title: 'Test Todo',
       description: 'Test Description',
       isClosed: false,
-      createdById: 2, // Created by another user
+      createdById: 2,
       updatedById: 2,
       createdAt: date,
       updatedAt: date,
@@ -458,7 +446,7 @@ describe('TodoService', () => {
 
   it('remove() should throw NotFoundException if todo does not exist', async () => {
     const adminId = 1;
-    const todoId = 999; // Non-existent Todo ID
+    const todoId = 999;
 
     mockTodoRepository.findOneBy.mockResolvedValue(null);
 
@@ -488,7 +476,7 @@ describe('TodoService', () => {
       title: 'Test Todo',
       description: 'Test Description',
       isClosed: false,
-      createdById: 1, // Different creator
+      createdById: 1,
       updatedById: 1,
       createdAt: date,
       updatedAt: date,
@@ -510,8 +498,8 @@ describe('TodoService', () => {
       id: 1,
       title: 'Test Todo',
       description: 'Test Description',
-      isClosed: false, // Open todo
-      createdById: userId, // Created by the user
+      isClosed: false,
+      createdById: userId,
       updatedById: userId,
       createdAt: date,
       updatedAt: date,
@@ -542,8 +530,8 @@ describe('TodoService', () => {
       id: 1,
       title: 'Test Todo',
       description: 'Test Description',
-      isClosed: true, // Closed todo
-      createdById: 2, // Created by someone else
+      isClosed: true,
+      createdById: 2,
       updatedById: 2,
       createdAt: date,
       updatedAt: date,
@@ -579,7 +567,7 @@ describe('TodoService', () => {
 
   it("should throw ForbiddenException if user tries to update someone else's todo", async () => {
     const id = 1;
-    const userId = 2; // Different user
+    const userId = 2;
     const dto: UpdateTodoDto = { isClosed: true };
 
     const todo = {
@@ -603,7 +591,7 @@ describe('TodoService', () => {
   it('should throw ForbiddenException if user tries to update their todo with isClosed set to false', async () => {
     const id = 1;
     const userId = 1;
-    const dto: UpdateTodoDto = { isClosed: false }; // Invalid value
+    const dto: UpdateTodoDto = { isClosed: false };
 
     const todo = {
       id: 1,

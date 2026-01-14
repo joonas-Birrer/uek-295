@@ -1,4 +1,3 @@
-// src/user/dto/return-user.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,

@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource, Repository } from 'typeorm';
 import { PasswordService } from './user/password.service';
 import { UserEntity } from './user/entities/user.entity';
-import { TodoEntity } from './todo/entities/todo.entity'; // Import TodoEntity
+import { TodoEntity } from './todo/entities/todo.entity';
 import { correlationIdMiddleware, loggerMiddleware } from './middlewares';
 
 async function bootstrap() {
@@ -62,7 +62,7 @@ async function bootstrap() {
 
 bootstrap()
   .then(async (app: INestApplication) => {
-    await initialUserLoad(app); // Initiales Laden von Benutzern und Todos
+    await initialUserLoad(app);
     Logger.log(`Server ist up and running`, 'bootstrap.then');
   })
   .catch((err) => console.error(err));
