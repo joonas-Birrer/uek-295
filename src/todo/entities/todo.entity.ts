@@ -9,20 +9,28 @@ export class TodoEntity {
   title: string;
 
   @Column({ type: 'varchar', nullable: true })
-  description?: string;
+  description: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'is_closed', type: 'boolean', default: false })
   isClosed: boolean;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'created_at',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt: Date;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'created_by_id', type: 'int' })
   createdById: number;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'updated_at',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updatedAt: Date;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'updated_by_id', type: 'int' })
   updatedById: number;
 }

@@ -11,24 +11,24 @@ export class UserEntity {
   @Column({ type: 'varchar' })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ name: 'password_hash', type: 'varchar' })
   passwordHash: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'is_admin', type: 'boolean', default: false })
   isAdmin: boolean;
 
-  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
+  @Column({ name: 'created_at', type: 'date', default: () => 'CURRENT_DATE' })
   createdAt: string;
 
-  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
+  @Column({ name: 'updated_at', type: 'date', default: () => 'CURRENT_DATE' })
   updatedAt: string;
 
   @Column({ type: 'int', default: 1 })
   version: number;
 
-  @Column({ type: 'int', default: 1 })
+  @Column({ name: 'created_by_id', type: 'int', default: 1 })
   createdById: number;
 
-  @Column({ type: 'int', default: 1 })
+  @Column({ name: 'updated_by_id', type: 'int', default: 1 })
   updatedById: number;
 }
