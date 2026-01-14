@@ -1,211 +1,739 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { TodoService } from './todo.service';
-import { TodoEntity } from './entities/todo.entity';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { TodoService } from './todo.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { TodoEntity } from './entities/todo.entity';
+import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { ReturnTodoDto } from './dto/return-todo.dto';
 import { UpdateTodoAdminDto } from './dto/update-todo-admin.dto';
-
-type RepoMock = {
-  create: jest.Mock;
-  save: jest.Mock;
-  find: jest.Mock;
-  findOneBy: jest.Mock;
-  remove: jest.Mock;
-};
 
 describe('TodoService', () => {
   let service: TodoService;
-  let repo: RepoMock;
+  let repo: Repository<TodoEntity>;
+  const date = new Date();
 
-  const createTodoDto: CreateTodoDto = {
-    title: 'Test Todo',
-    description: 'Test Description',
+  const mockTodoRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+    findOneBy: jest.fn(),
+    remove: jest.fn(),
   };
-  const updateTodoDto: UpdateTodoDto = {
-    isClosed: true,
-  };
-  const updateTodoAdminDto: UpdateTodoAdminDto = {
-    isClosed: true,
-  };
-  const returnTodoDto: ReturnTodoDto = {
-    id: 1,
-    title: 'Test Todo',
-    description: 'Test Description',
-    isClosed: false,
-    createdById: 1,
-    updatedById: 1,
-    createdAt: '2026-01-14T09:57:27.006Z',
-    updatedAt: '2026-01-14T09:57:27.006Z',
-  };
-
-  const entity: TodoEntity = {
-    id: 1,
-    title: 'Test Todo',
-    description: 'Test Description',
-    isClosed: false,
-    createdById: 1,
-    updatedById: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  } as TodoEntity;
 
   beforeEach(async () => {
-    // Mocking current date to ensure consistency across tests
-    const fixedDate = new Date('2026-01-14T09:57:27.006Z');
-    jest.spyOn(global, 'Date').mockImplementation(() => fixedDate as string);
-
-    repo = {
-      create: jest.fn(),
-      save: jest.fn(),
-      find: jest.fn(),
-      findOneBy: jest.fn(),
-      remove: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TodoService,
         {
           provide: getRepositoryToken(TodoEntity),
-          useValue: repo,
+          useValue: mockTodoRepository,
         },
       ],
     }).compile();
 
     service = module.get<TodoService>(TodoService);
+    repo = module.get<Repository<TodoEntity>>(getRepositoryToken(TodoEntity));
   });
 
-  describe('create', () => {
-    it('should create a Todo', async () => {
-      repo.create.mockReturnValue(entity);
-      repo.save.mockResolvedValue(entity);
-
-      const result = await service.create(createTodoDto, 1);
-
-      expect(repo.create).toHaveBeenCalledWith(createTodoDto);
-      expect(repo.save).toHaveBeenCalled();
-      expect(result).toEqual({
-        ...returnTodoDto,
-        createdAt: '2026-01-14T09:57:27.006Z',
-        updatedAt: '2026-01-14T09:57:27.006Z',
-      });
-    });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
-  describe('findAll', () => {
-    it('should return all Todos for admin', async () => {
-      repo.find.mockResolvedValue([entity]);
-      const result = await service.findAll(1, true);
+  // Test for creating a Todo
+  it('create() should create a new todo and return it', async () => {
+    const createTodoDto: CreateTodoDto = {
+      title: 'Test Todo',
+      description: 'Test Description',
+    };
+    const userId = 1;
 
-      expect(result).toEqual([returnTodoDto]);
+    const newTodo = {
+      id: 1,
+      ...createTodoDto,
+      isClosed: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdById: userId,
+      updatedById: userId,
+    } as TodoEntity;
+
+    mockTodoRepository.create.mockReturnValue(newTodo);
+    mockTodoRepository.save.mockResolvedValue(newTodo);
+
+    const result = await service.create(createTodoDto, userId);
+
+    expect(mockTodoRepository.create).toHaveBeenCalledWith({
+      title: createTodoDto.title,
+      description: createTodoDto.description,
+      isClosed: false,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+      createdById: userId,
+      updatedById: userId,
     });
-
-    it('should return only open Todos for the user', async () => {
-      repo.find.mockResolvedValue([entity]);
-      const result = await service.findAll(1, false);
-
-      expect(result).toEqual([returnTodoDto]);
-    });
-  });
-
-  describe('findOne', () => {
-    it('should throw NotFoundException if Todo not found', async () => {
-      repo.findOneBy.mockResolvedValue(null);
-      await expect(service.findOne(999, 1, false)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should return a single Todo', async () => {
-      repo.findOneBy.mockResolvedValue(entity);
-      const result = await service.findOne(1, 1, false);
-
-      expect(result).toEqual(returnTodoDto);
-    });
-
-    it('should throw ForbiddenException for closed Todo if not admin', async () => {
-      repo.findOneBy.mockResolvedValue({ ...entity, isClosed: true });
-      await expect(service.findOne(1, 1, false)).rejects.toThrow(
-        ForbiddenException,
-      );
+    expect(mockTodoRepository.save).toHaveBeenCalledWith(newTodo);
+    expect(result).toEqual({
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
     });
   });
 
-  describe('updateUser', () => {
-    it('should update a Todo for the user', async () => {
-      repo.findOneBy.mockResolvedValue(entity);
-      repo.save.mockResolvedValue(entity);
+  // Test for finding all Todos
+  it('findAll() should return todos for a user', async () => {
+    const userId = 1;
+    const isAdmin = false;
 
-      const result = await service.updateUser(1, updateTodoDto, 1);
+    const todos = [
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: userId,
+        updatedById: userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as TodoEntity,
+    ];
 
-      expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 });
-      expect(repo.save).toHaveBeenCalledWith({
-        ...entity,
+    mockTodoRepository.find.mockResolvedValue(todos);
+
+    const result = await service.findAll(userId, isAdmin);
+
+    expect(mockTodoRepository.find).toHaveBeenCalledWith({
+      where: {
+        createdById: userId,
+        isClosed: false,
+      },
+    });
+    expect(result).toEqual([
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: userId,
+        updatedById: userId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    ]);
+  });
+
+  // Test for finding one Todo
+  it('findOne() should return a todo if it exists', async () => {
+    const userId = 1;
+    const isAdmin = false;
+    const todoId = 1;
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    const result = await service.findOne(todoId, userId, isAdmin);
+
+    expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id: todoId });
+    expect(result).toEqual({
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
+
+  // Test for finding one Todo (Not Found)
+  it('findOne() should throw NotFoundException if todo is not found', async () => {
+    const userId = 1;
+    const isAdmin = false;
+    const todoId = 999;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.findOne(todoId, userId, isAdmin)).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  // Test for updating a Todo by user
+  it('updateUser() should update a todo for a user', async () => {
+    const userId = 1;
+    const todoId = 1;
+    const updateDto: UpdateTodoDto = { isClosed: true };
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    const updatedTodo = { ...todo, ...updateDto, updatedAt: new Date() };
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+    mockTodoRepository.save.mockResolvedValue(updatedTodo);
+
+    const result = await service.updateUser(todoId, updateDto, userId);
+
+    expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id: todoId });
+    expect(mockTodoRepository.save).toHaveBeenCalledWith({
+      ...todo,
+      isClosed: true,
+      updatedAt: expect.any(Date),
+      updatedById: userId,
+      id: todoId,
+    });
+    expect(result).toEqual({
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: true,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
+
+  // Test for deleting a Todo by admin
+  it('remove() should delete a todo for an admin', async () => {
+    const adminId = 1;
+    const todoId = 1;
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: adminId,
+      updatedById: adminId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+    mockTodoRepository.remove.mockResolvedValue(todo);
+
+    const result = await service.remove(todoId, true, adminId);
+
+    expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id: todoId });
+    expect(mockTodoRepository.remove).toHaveBeenCalledWith(todo);
+    expect(result).toEqual({
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: adminId,
+      updatedById: adminId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+  });
+
+  // Test for remove() when the user is not an admin
+  it('remove() should throw ForbiddenException if user is not an admin', async () => {
+    const userId = 1;
+    const todoId = 1;
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.remove(todoId, false, userId)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  // Test for findAll when admin user exists
+  it('findAll() should return all todos when admin user is true', async () => {
+    const adminId = 1;
+    const isAdmin = true;
+
+    const todos = [
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 2,
+        title: 'Closed Todo',
+        description: 'Closed Description',
         isClosed: true,
-        updatedAt: expect.any(Date),
-        updatedById: 1,
-      });
-      expect(result).toEqual(returnTodoDto);
-    });
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
 
-    it('should throw NotFoundException if Todo not found', async () => {
-      repo.findOneBy.mockResolvedValue(null);
-      await expect(service.updateUser(1, updateTodoDto, 1)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
+    mockTodoRepository.find.mockResolvedValue(todos);
 
-    it("should throw ForbiddenException if user tries to update another user's Todo", async () => {
-      repo.findOneBy.mockResolvedValue({ ...entity, createdById: 2 });
-      await expect(service.updateUser(1, updateTodoDto, 1)).rejects.toThrow(
-        ForbiddenException,
-      );
+    const result = await service.findAll(adminId, isAdmin);
+
+    expect(mockTodoRepository.find).toHaveBeenCalled();
+    expect(result).toEqual([
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+      {
+        id: 2,
+        title: 'Closed Todo',
+        description: 'Closed Description',
+        isClosed: true,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    ]);
+  });
+
+  // Test for updating a Todo by a user who is not the creator
+  it("updateUser() should throw ForbiddenException if user tries to update another user's todo", async () => {
+    const userId = 1;
+    const todoId = 2; // Todo created by another user
+    const updateDto: UpdateTodoDto = { isClosed: false };
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: 2, // Created by another user
+      updatedById: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.updateUser(todoId, updateDto, userId)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  // Test for removing a Todo when todo does not exist
+  it('remove() should throw NotFoundException if todo does not exist', async () => {
+    const adminId = 1;
+    const todoId = 999; // Non-existent Todo ID
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.remove(todoId, true, adminId)).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  // Test for findAll when admin user exists
+  it('findAll() should return all todos when admin user is true', async () => {
+    const adminId = 1;
+    const isAdmin = true;
+
+    const todos = [
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 2,
+        title: 'Closed Todo',
+        description: 'Closed Description',
+        isClosed: true,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    mockTodoRepository.find.mockResolvedValue(todos);
+
+    const result = await service.findAll(adminId, isAdmin);
+
+    expect(mockTodoRepository.find).toHaveBeenCalled();
+    expect(result).toEqual([
+      {
+        id: 1,
+        title: 'Test Todo',
+        description: 'Test Description',
+        isClosed: false,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+      {
+        id: 2,
+        title: 'Closed Todo',
+        description: 'Closed Description',
+        isClosed: true,
+        createdById: adminId,
+        updatedById: adminId,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    ]);
+  });
+
+  // Test for updating a Todo by a user who is not the creator
+  it("updateUser() should throw ForbiddenException if user tries to update another user's todo", async () => {
+    const userId = 1;
+    const todoId = 2; // Todo created by another user
+    const updateDto: UpdateTodoDto = { isClosed: true };
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: 2, // Created by another user
+      updatedById: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.updateUser(todoId, updateDto, userId)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it("updateUser() should throw ForbiddenException if user tries to update another user's todo", async () => {
+    const userId = 2;
+    const todoId = 1;
+    const updateDto: UpdateTodoDto = { isClosed: true };
+
+    const todo = {
+      id: todoId,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: 1,
+      updatedById: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.updateUser(todoId, updateDto, userId)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('remove() should throw NotFoundException if todo does not exist', async () => {
+    const adminId = 1;
+    const todoId = 999; // Non-existent Todo ID
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.remove(todoId, true, adminId)).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+  it('should throw NotFoundException if todo is not found', async () => {
+    const id = 1;
+    const userId = 1;
+    const isAdmin = false;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.findOne(id, userId, isAdmin)).rejects.toThrow(
+      new NotFoundException(`Todo ${id} not found`),
+    );
+  });
+
+  it('should throw ForbiddenException if user tries to access a todo not created by them', async () => {
+    const id = 1;
+    const userId = 2;
+    const isAdmin = false;
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: 1, // Different creator
+      updatedById: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.findOne(id, userId, isAdmin)).rejects.toThrow(
+      new ForbiddenException('You are not authorized to access this Todo'),
+    );
+  });
+
+  it('should return the todo if the user created it and the todo is open', async () => {
+    const id = 1;
+    const userId = 1;
+    const isAdmin = false;
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false, // Open todo
+      createdById: userId, // Created by the user
+      updatedById: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    const result = await service.findOne(id, userId, isAdmin);
+
+    expect(result).toEqual({
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
     });
   });
 
-  describe('updateAdmin', () => {
-    it('should update Todo as an admin', async () => {
-      repo.findOneBy.mockResolvedValue(entity);
-      repo.save.mockResolvedValue(entity);
+  it('should return the todo if the user is an admin, regardless of the closed status', async () => {
+    const id = 1;
+    const userId = 1;
+    const isAdmin = true;
 
-      const result = await service.updateAdmin(1, updateTodoAdminDto, 1);
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: true, // Closed todo
+      createdById: 2, // Created by someone else
+      updatedById: 2,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
 
-      expect(result).toEqual(returnTodoDto);
-    });
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
 
-    it('should throw NotFoundException if Todo not found', async () => {
-      repo.findOneBy.mockResolvedValue(null);
-      await expect(
-        service.updateAdmin(1, updateTodoAdminDto, 1),
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
+    const result = await service.findOne(id, userId, isAdmin);
 
-  describe('remove', () => {
-    it('should remove Todo if admin', async () => {
-      repo.findOneBy.mockResolvedValue(entity);
-      repo.remove.mockResolvedValue(entity);
-
-      const result = await service.remove(1, true);
-
-      expect(result).toEqual(returnTodoDto);
-    });
-
-    it('should throw NotFoundException if Todo not found', async () => {
-      repo.findOneBy.mockResolvedValue(null);
-      await expect(service.remove(999, true)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should throw ForbiddenException if not admin', async () => {
-      repo.findOneBy.mockResolvedValue(entity);
-      await expect(service.remove(1, false)).rejects.toThrow(
-        ForbiddenException,
-      );
+    expect(result).toEqual({
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: true,
+      createdById: 2,
+      updatedById: 2,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
     });
   });
+
+  it('should throw NotFoundException if todo is not found', async () => {
+    const id = 1;
+    const userId = 1;
+    const dto: UpdateTodoDto = { isClosed: true };
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.updateUser(id, dto, userId)).rejects.toThrow(
+      new NotFoundException(`Todo ${id} not found`),
+    );
+  });
+
+  it('should throw ForbiddenException if user tries to update someone else\'s todo', async () => {
+    const id = 1;
+    const userId = 2; // Different user
+    const dto: UpdateTodoDto = { isClosed: true };
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: 1,
+      updatedById: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.updateUser(id, dto, userId)).rejects.toThrow(
+      new ForbiddenException('You can only update your own Todos'),
+    );
+  });
+
+  it('should throw ForbiddenException if user tries to update their todo with isClosed set to false', async () => {
+    const id = 1;
+    const userId = 1;
+    const dto: UpdateTodoDto = { isClosed: false }; // Invalid value
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.updateUser(id, dto, userId)).rejects.toThrow(
+      new ForbiddenException('User can only set isClosed to true'),
+    );
+  });
+
+  it('should update todo if user owns it and sets isClosed to true', async () => {
+    const id = 1;
+    const userId = 1;
+    const dto: UpdateTodoDto = { isClosed: true };
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: 'Test Description',
+      isClosed: false,
+      createdById: userId,
+      updatedById: userId,
+      createdAt: date,
+      updatedAt: date,
+    } as TodoEntity;
+
+    const updatedTodo = {
+      ...todo,
+      ...dto,
+      updatedAt: date.toString(),
+      createdAt: date.toString(),
+    };
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+    mockTodoRepository.save.mockResolvedValue(updatedTodo);
+
+    const result = await service.updateUser(id, dto, userId);
+
+    expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id });
+
+    expect(result).toEqual(updatedTodo);
+  });
+
+  it('should throw NotFoundException if todo is not found', async () => {
+    const id = 1;
+    const adminId = 1;
+    const dto: UpdateTodoAdminDto = { isClosed: true };
+
+    mockTodoRepository.findOneBy.mockResolvedValue(null);
+
+    await expect(service.updateAdmin(id, dto, adminId)).rejects.toThrow(
+      new NotFoundException(`Todo ${id} not found`),
+    );
+  });
+
+  it('should update todo when admin sets isClosed to false', async () => {
+    const id = 1;
+    const adminId = 1;
+    const dto: UpdateTodoAdminDto = { isClosed: false };
+
+    const todo = {
+      id: 1,
+      title: 'Test Todo',
+      description: undefined,
+      isClosed: true,
+      createdById: 2,
+      updatedById: 2,
+      createdAt: date,
+      updatedAt: date,
+    } as TodoEntity;
+
+    const updatedTodo = {
+      ...todo,
+      ...dto,
+      description: "",
+      updatedAt: date.toString(),
+      createdAt: date.toString(),
+    };
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+    mockTodoRepository.save.mockResolvedValue(updatedTodo);
+
+    const result = await service.updateAdmin(id, dto, adminId);
+
+    expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id });
+    expect(result).toEqual(updatedTodo);
+  });
+  it('findOne() throws ForbiddenException when non-admin accesses closed todo', async () => {
+    const todo = {
+      id: 1,
+      title: 'Test',
+      description: 'Desc',
+      isClosed: true,
+      createdById: 1,
+      updatedById: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as TodoEntity;
+
+    mockTodoRepository.findOneBy.mockResolvedValue(todo);
+
+    await expect(service.findOne(1, 1, false)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
 });

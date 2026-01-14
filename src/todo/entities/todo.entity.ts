@@ -9,7 +9,7 @@ export class TodoEntity {
   title: string;
 
   @Column({ type: 'varchar', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'boolean', default: false })
   isClosed: boolean;

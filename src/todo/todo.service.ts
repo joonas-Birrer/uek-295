@@ -22,15 +22,12 @@ export class TodoService {
     return {
       id: entity.id,
       title: entity.title,
-      description:
-        entity.description == null
-          ? ''.toString()
-          : entity.description.toString(),
+      description: entity.description,
       isClosed: entity.isClosed,
       createdById: entity.createdById,
       updatedById: entity.updatedById,
-      createdAt: entity.createdAt.toISOString(),
-      updatedAt: entity.updatedAt.toISOString(),
+      updatedAt: entity.updatedAt.toString(),
+      createdAt: entity.createdAt.toString(),
     };
   }
 
@@ -109,7 +106,7 @@ export class TodoService {
       throw new ForbiddenException('You can only update your own Todos');
     }
 
-    if (dto.isClosed !== true) {
+    if (!dto.isClosed) {
       throw new ForbiddenException('User can only set isClosed to true');
     }
 

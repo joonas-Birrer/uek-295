@@ -11,7 +11,7 @@ export class ReturnTodoDto {
     description: 'description',
     example: 'Example of an open admin todo',
   })
-  description!: string;
+  description?: string;
 
   @ApiProperty({ description: 'isClosed', example: false })
   isClosed!: boolean;
