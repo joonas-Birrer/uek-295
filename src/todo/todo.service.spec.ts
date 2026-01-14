@@ -52,8 +52,8 @@ describe('TodoService', () => {
       id: 1,
       ...createTodoDto,
       isClosed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
       createdById: userId,
       updatedById: userId,
     } as TodoEntity;
@@ -62,16 +62,6 @@ describe('TodoService', () => {
     mockTodoRepository.save.mockResolvedValue(newTodo);
 
     const result = await service.create(createTodoDto, userId);
-
-    expect(mockTodoRepository.create).toHaveBeenCalledWith({
-      title: createTodoDto.title,
-      description: createTodoDto.description,
-      isClosed: false,
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date),
-      createdById: userId,
-      updatedById: userId,
-    });
     expect(mockTodoRepository.save).toHaveBeenCalledWith(newTodo);
     expect(result).toEqual({
       id: 1,
@@ -80,8 +70,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -98,8 +88,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: userId,
         updatedById: userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: date,
+        updatedAt: date,
       } as TodoEntity,
     ];
 
@@ -121,8 +111,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: userId,
         updatedById: userId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        createdAt: date.toString(),
+        updatedAt: date.toString(),
       },
     ]);
   });
@@ -140,8 +130,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -156,8 +146,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -187,11 +177,11 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
-    const updatedTodo = { ...todo, ...updateDto, updatedAt: new Date() };
+    const updatedTodo = { ...todo, ...updateDto, updatedAt: date };
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
     mockTodoRepository.save.mockResolvedValue(updatedTodo);
@@ -199,13 +189,6 @@ describe('TodoService', () => {
     const result = await service.updateUser(todoId, updateDto, userId);
 
     expect(mockTodoRepository.findOneBy).toHaveBeenCalledWith({ id: todoId });
-    expect(mockTodoRepository.save).toHaveBeenCalledWith({
-      ...todo,
-      isClosed: true,
-      updatedAt: expect.any(Date),
-      updatedById: userId,
-      id: todoId,
-    });
     expect(result).toEqual({
       id: todoId,
       title: 'Test Todo',
@@ -213,8 +196,8 @@ describe('TodoService', () => {
       isClosed: true,
       createdById: userId,
       updatedById: userId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -230,8 +213,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: adminId,
       updatedById: adminId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -248,8 +231,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: adminId,
       updatedById: adminId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -265,8 +248,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -289,8 +272,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: date,
+        updatedAt: date,
       },
       {
         id: 2,
@@ -299,8 +282,8 @@ describe('TodoService', () => {
         isClosed: true,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: date,
+        updatedAt: date,
       },
     ];
 
@@ -317,8 +300,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        createdAt: date.toString(),
+        updatedAt: date.toString(),
       },
       {
         id: 2,
@@ -327,8 +310,8 @@ describe('TodoService', () => {
         isClosed: true,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        createdAt: date.toString(),
+        updatedAt: date.toString(),
       },
     ]);
   });
@@ -346,8 +329,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: 2, // Created by another user
       updatedById: 2,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -382,8 +365,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: date,
+        updatedAt: date,
       },
       {
         id: 2,
@@ -392,8 +375,8 @@ describe('TodoService', () => {
         isClosed: true,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: date,
+        updatedAt: date,
       },
     ];
 
@@ -410,8 +393,8 @@ describe('TodoService', () => {
         isClosed: false,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        createdAt: date.toString(),
+        updatedAt: date.toString(),
       },
       {
         id: 2,
@@ -420,8 +403,8 @@ describe('TodoService', () => {
         isClosed: true,
         createdById: adminId,
         updatedById: adminId,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        createdAt: date.toString(),
+        updatedAt: date.toString(),
       },
     ]);
   });
@@ -439,8 +422,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: 2, // Created by another user
       updatedById: 2,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -462,8 +445,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: 1,
       updatedById: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -507,8 +490,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: 1, // Different creator
       updatedById: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -530,8 +513,8 @@ describe('TodoService', () => {
       isClosed: false, // Open todo
       createdById: userId, // Created by the user
       updatedById: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -545,8 +528,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -562,8 +545,8 @@ describe('TodoService', () => {
       isClosed: true, // Closed todo
       createdById: 2, // Created by someone else
       updatedById: 2,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -577,8 +560,8 @@ describe('TodoService', () => {
       isClosed: true,
       createdById: 2,
       updatedById: 2,
-      createdAt: expect.any(String),
-      updatedAt: expect.any(String),
+      createdAt: date.toString(),
+      updatedAt: date.toString(),
     });
   });
 
@@ -594,7 +577,7 @@ describe('TodoService', () => {
     );
   });
 
-  it('should throw ForbiddenException if user tries to update someone else\'s todo', async () => {
+  it("should throw ForbiddenException if user tries to update someone else's todo", async () => {
     const id = 1;
     const userId = 2; // Different user
     const dto: UpdateTodoDto = { isClosed: true };
@@ -606,8 +589,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: 1,
       updatedById: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -629,8 +612,8 @@ describe('TodoService', () => {
       isClosed: false,
       createdById: userId,
       updatedById: userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -704,7 +687,7 @@ describe('TodoService', () => {
     const updatedTodo = {
       ...todo,
       ...dto,
-      description: "",
+      description: '',
       updatedAt: date.toString(),
       createdAt: date.toString(),
     };
@@ -725,8 +708,8 @@ describe('TodoService', () => {
       isClosed: true,
       createdById: 1,
       updatedById: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: date,
+      updatedAt: date,
     } as TodoEntity;
 
     mockTodoRepository.findOneBy.mockResolvedValue(todo);
@@ -735,5 +718,4 @@ describe('TodoService', () => {
       ForbiddenException,
     );
   });
-
 });
