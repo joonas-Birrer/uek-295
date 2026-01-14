@@ -22,18 +22,15 @@ export class TodoService {
     return {
       id: entity.id,
       title: entity.title,
-      description: entity.description ?? '',
+      description:
+        entity.description == null
+          ? ''.toString()
+          : entity.description.toString(),
       isClosed: entity.isClosed,
       createdById: entity.createdById,
       updatedById: entity.updatedById,
-      createdAt:
-        entity.createdAt instanceof Date
-          ? entity.createdAt.toISOString()
-          : String(entity.createdAt),
-      updatedAt:
-        entity.updatedAt instanceof Date
-          ? entity.updatedAt.toISOString()
-          : String(entity.updatedAt),
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
     };
   }
 
@@ -64,7 +61,6 @@ export class TodoService {
       return arr.map((e) => this.entityToDto(e));
     }
 
-    // Regular user sees only their own and open Todos
     const arr = await this.repo.find({
       where: {
         createdById: userId,
@@ -91,7 +87,6 @@ export class TodoService {
       );
     }
 
-    // Users can only view their own open Todos
     if (!isAdmin && entity.isClosed === true) {
       throw new ForbiddenException('You can only view your open Todos');
     }
@@ -114,7 +109,6 @@ export class TodoService {
       throw new ForbiddenException('You can only update your own Todos');
     }
 
-    // User can only close the Todo
     if (dto.isClosed !== true) {
       throw new ForbiddenException('User can only set isClosed to true');
     }
@@ -152,7 +146,11 @@ export class TodoService {
     return this.entityToDto(updated);
   }
 
-  async remove(id: number, isAdmin: boolean): Promise<ReturnTodoDto> {
+  async remove(
+    id: number,
+    isAdmin: boolean,
+    userId: number,
+  ): Promise<ReturnTodoDto> {
     const existing = await this.repo.findOneBy({ id });
 
     if (!existing) {
@@ -164,6 +162,7 @@ export class TodoService {
     }
 
     await this.repo.remove(existing);
+    existing.updatedById = userId;
     return this.entityToDto(existing);
   }
 }

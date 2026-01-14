@@ -12,7 +12,5 @@ export class CreateTodoDto {
     description: 'Todo description',
     example: 'Example of an open admin todo',
   })
-  @IsString()
-  @IsNotEmpty()
   description!: string;
 }

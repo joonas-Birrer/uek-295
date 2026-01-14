@@ -13,6 +13,9 @@ import {
   ApiTags,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CorrId, User, Public } from '../decorators';
@@ -27,20 +30,20 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
-  @Public()
   @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: TokenInfoDto })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: TokenInfoDto })
+  @ApiBadRequestResponse({ description: 'Invalid login credentials' })
   signIn(@CorrId() corrId: number, @Body() signInDto: SignInDto) {
-    this.logger.log(
-      `${corrId} login with: ${JSON.stringify({ username: signInDto.username })}`,
-    );
+    this.logger.log(`Login attempt for: ${signInDto.username}`);
     return this.authService.signIn(corrId, signInDto);
   }
 
   @Public()
   @Post('register')
   @ApiCreatedResponse({ type: ReturnUserDto })
+  @ApiBadRequestResponse({ description: 'Invalid request' })
+  @ApiConflictResponse({ description: 'User already exists' })
   register(@CorrId() corrId: number, @Body() dto: CreateUserDto) {
     return this.authService.register(corrId, dto);
   }
@@ -49,6 +52,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ReturnUserDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   getProfile(@User() user: ReturnUserDto) {
     return user;
   }

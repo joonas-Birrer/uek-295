@@ -1,7 +1,7 @@
 // src/middlewares/correlation-id.middleware.ts
 import { Response, NextFunction } from 'express';
 import { CorrelationIdRequest } from '../types/correlation-id-request';
-import { randomInt } from '../lib/random.util.ts';
+import { randomInt } from 'node:crypto';
 
 export function correlationIdMiddleware(
   req: CorrelationIdRequest,

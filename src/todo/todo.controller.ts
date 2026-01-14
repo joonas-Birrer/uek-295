@@ -90,7 +90,7 @@ export class TodoController {
       return this.todoService.updateAdmin(id, adminDto, userId);
     }
 
-    if (dto.isClosed !== true) {
+    if (!dto.isClosed) {
       throw new ForbiddenException('User can only set isClosed to true');
     }
 
@@ -103,11 +103,12 @@ export class TodoController {
     @CorrId() corrId: number,
     @Param('id', ParseIntPipe) id: number,
     @IsAdmin() isAdmin: boolean,
+    @UserId() userId: number,
   ) {
     if (!isAdmin) {
       throw new ForbiddenException('Only admins can delete todos');
     }
 
-    return this.todoService.remove(id, isAdmin);
+    return this.todoService.remove(id, isAdmin, userId);
   }
 }

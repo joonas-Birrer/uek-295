@@ -1,4 +1,3 @@
-// src/auth/auth.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -93,7 +92,6 @@ describe('AuthService', () => {
       UnauthorizedException,
     );
 
-    // JWT must not be signed if password is wrong
     expect(jwtService.signAsync).not.toHaveBeenCalled();
   });
 
