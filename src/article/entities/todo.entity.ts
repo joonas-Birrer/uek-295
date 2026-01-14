@@ -8,7 +8,7 @@ export class TodoEntity {
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
-  @Column({ type: 'varchar'})
+  @Column({ type: 'varchar' })
   description: string;
 
   @Column({ type: 'boolean', default: false })

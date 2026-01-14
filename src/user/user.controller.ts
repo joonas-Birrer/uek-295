@@ -58,7 +58,6 @@ export class UserController {
   @ApiBody({ type: CreateUserDto })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-
   create(@CorrId() corrId: number, @Body() createUserDto: CreateUserDto) {
     return this.userService.create(corrId, createUserDto);
   }
