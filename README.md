@@ -37,3 +37,14 @@ zippen nachdem alles durchgelaufen ist linter build ect
 abgeben
 nach hause
 schlafen
+
+Fazit:
+Ich habe nicht wie gestern in der Planung gearbeitet.
+Ich habe zuerst alles verwendet, was uns zur Verfügung gestellt wurde, und danach den Rest ergänzt.
+Ich finde, das Projekt ist mir gut gelungen, und ich habe einiges gelernt.
+Das Einzige, was nicht wirklich gut funktioniert hat, war die 100 % Test Coverage. Nach einigen Versuchen habe ich diese nun aber erreicht.
+Das „Einfache“ war für mich das n2n-Testing, da ich bei Fehlern den ÜK-Leiter informiert habe, der diese am Schluss angepasst hat.
+
+War eine Zeit.
+
+– Jonas
