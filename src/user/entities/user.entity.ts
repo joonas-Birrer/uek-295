@@ -17,16 +17,18 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean;
 
-  @Column({ type: 'date', default: new Date() })
+  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   createdAt: string;
 
-  @Column({ type: 'date', default: new Date() })
+  @Column({ type: 'date', default: () => 'CURRENT_DATE' })
   updatedAt: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 1 })
   version: number;
-  @Column({ type: 'int' })
+
+  @Column({ type: 'int', default: 1 })
   createdById: number;
-  @Column({ type: 'int' })
+
+  @Column({ type: 'int', default: 1 })
   updatedById: number;
 }

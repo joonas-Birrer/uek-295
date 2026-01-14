@@ -1,13 +1,31 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { TodoModule } from './todo/todo.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TodoModule } from './article/todo.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [AuthModule, TodoModule, UserModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: configService.get<'sqlite'>('DB_TYPE', 'sqlite'),
+        database: configService.get<string>('DB_DATABASE', 'data/app.db'), // Pfad zur SQLite-Datei
+        entities: [],
+        autoLoadEntities: true,
+        synchronize: true, // DEV ok, PROD besser mit Migrations
+        logging: false,
+      }),
+    }),
+    TodoModule,
+    UserModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}
